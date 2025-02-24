@@ -1,0 +1,88 @@
+{
+    "Table": [
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP1",
+        "ServerName": "HOUSAPEDISQL3A",
+        "DBInstance": "DEDIDBPRD,11533",
+        "Database": "SAPEDI"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP1",
+        "ServerName": "HOUSAPEDISQL3A",
+        "DBInstance": "DEDIDBPRD\\EDI",
+        "Database": "SAPEDI"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP1",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "DataMigration"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP1",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "SATURN_06032024"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP1",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "SATURN_06202024"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP2",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "CSA6_HIST"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP2",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "CSA7_HIST"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP2",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "VSP_2011"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP2",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "VSP_2012"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP2",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "VSP_2013"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP3",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "VSP2_2018"
+      },
+      {
+        "ApplicationName": "SAP",
+        "AppComponentName": "AP3",
+        "ServerName": "HOUSAPARCSQL4",
+        "DBInstance": "HOUSAPARCSQL4\\VSA",
+        "Database": "VSP3_2018"
+      }
+    ]
+  }
