@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Tree View</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .upload-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .node rect {
+            stroke-width: 2px;
+            rx: 5;
+            ry: 5;
+        }
+
+        .node text {
+            font: 12px sans-serif;
+        }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 2px;
+        }
+
+        .application rect {
+            fill: #e6f3ff;
+            stroke: #b3d9ff;
+        }
+
+        .component rect {
+            fill: #e6f3ff;
+            stroke: #b3d9ff;
+        }
+
+        .server rect {
+            fill: #f8e6ff;
+            stroke: #e6b3ff;
+        }
+
+        .instance rect {
+            fill: #e6ffe6;
+            stroke: #b3ffb3;
+        }
+
+        .database rect {
+            fill: #fff2e6;
+            stroke: #ffcc99;
+        }
+
+        .node-icon {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-section">
+        <textarea id="jsonInput" placeholder="Paste your JSON here..."></textarea>
+        <button onclick="processJSON()">Process JSON</button>
+    </div>
+    <div id="treeContainer"></div>
+
+    <script>
+        // Define SVG icons as templates
+        const icons = {
+            application: `<svg width="24" height="24" viewBox="0 0 24 24">
+                <rect x="2" y="4" width="20" height="16" rx="2" fill="#4a90e2"/>
+                <rect x="4" y="8" width="16" height="8" fill="white"/>
+            </svg>`,
+            component: `<svg width="24" height="24" viewBox="0 0 24 24">
+                <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" fill="#4a90e2"/>
+                <path d="M12 4L4 8v8l8 4 8-4V8L12 4z" fill="white"/>
+            </svg>`,
+            server: `<svg width="24" height="24" viewBox="0 0 24 24">
+                <rect x="4" y="2" width="16" height="20" rx="2" fill="#9b59b6"/>
+                <rect x="6" y="4" width="12" height="2" fill="white"/>
+                <rect x="6" y="8" width="12" height="2" fill="white"/>
+                <rect x="6" y="12" width="12" height="2" fill="white"/>
+            </svg>`,
+            database: `<svg width="24" height="24" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 4.02 2 6.5v11C2 19.98 6.48 22 12 22s10-2.02 10-4.5v-11C22 4.02 17.52 2 12 2z" fill="#e67e22"/>
+                <ellipse cx="12" cy="6.5" rx="10" ry="4.5" fill="white"/>
+            </svg>`,
+            instance: `<svg width="24" height="24" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 4.02 2 6.5v11C2 19.98 6.48 22 12 22s10-2.02 10-4.5v-11C22 4.02 17.52 2 12 2z" fill="#2ecc71"/>
+                <ellipse cx="12" cy="6.5" rx="10" ry="4.5" fill="white"/>
+            </svg>`
+        };
+
+        function processData(data) {
+            const root = {
+                name: data.Table[0].ApplicationName,
+                type: 'application',
+                children: []
+            };
+
+            const components = {};
+            
+            
+            data.Table.forEach(item => {
+                if (!components[item.AppComponentName]) {
+                    components[item.AppComponentName] = {
+                        name: item.AppComponentName,
+                        type: 'component',
+                        children: []
+                    };
+                    root.children.push(components[item.AppComponentName]);
+                }
+
+                
+                const serverKey = `${item.AppComponentName}-${item.ServerName}`;
+                let server = components[item.AppComponentName].children.find(s => s.name === item.ServerName);
+                
+                if (!server) {
+                    server = {
+                        name: item.ServerName,
+                        type: 'server',
+                        children: []
+                    };
+                    components[item.AppComponentName].children.push(server);
+                }
+
+                let instance = server.children.find(i => i.name === item.DBInstance);
+                if (!instance) {
+                    instance = {
+                        name: item.DBInstance,
+                        type: 'instance',
+                        children: []
+                    };
+                    server.children.push(instance);
+                }
+
+                instance.children.push({
+                    name: item.Database,
+                    type: 'database'
+                });
+            });
+
+            return root;
+        }
+
+        function createTree(data) {
+            const width = 1200;
+            const height = 800;
+            const margin = {top: 20, right: 120, bottom: 20, left: 120};
+
+            // Clear previous tree
+            d3.select("#treeContainer").selectAll("*").remove();
+
+            const svg = d3.select("#treeContainer")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const tree = d3.tree()
+                .size([height - margin.top - margin.bottom, width - margin.left - margin.right]);
+
+            const root = d3.hierarchy(data);
+            tree(root);
+
+            // Add links
+            const link = svg.selectAll(".link")
+                .data(root.links())
+                .enter()
+                .append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkHorizontal()
+                    .x(d => d.y)
+                    .y(d => d.x));
+
+            // Add nodes
+            const node = svg.selectAll(".node")
+                .data(root.descendants())
+                .enter()
+                .append("g")
+                .attr("class", d => `node ${d.data.type}`)
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+
+            // Add rectangles for nodes
+            node.append("rect")
+                .attr("width", d => d.data.name.length * 8 + 40)
+                .attr("height", 30)
+                .attr("x", -20)
+                .attr("y", -15);
+
+            // Add SVG icons
+            node.each(function(d) {
+                const icon = icons[d.data.type];
+                if (icon) {
+                    const iconContainer = d3.select(this)
+                        .append("g")
+                        .attr("transform", "translate(-15, -12) scale(0.8)");
+                    
+                    iconContainer.html(icon);
+                }
+            });
+
+            // Add text to nodes
+            node.append("text")
+                .attr("dy", 5)
+                .attr("x", 5)
+                .style("text-anchor", "start")
+                .text(d => d.data.name);
+        }
+
+        function processJSON() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            try {
+                const data = JSON.parse(jsonInput);
+                const processedData = processData(data);
+                createTree(processedData);
+            } catch (error) {
+                alert('Invalid JSON format. Please check your input.');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html> 
