@@ -19,14 +19,21 @@
           </div>
         </div>
       </header>
-      <main class="container mx-auto flex flex-col md:flex-row gap-8 px-4">
-        <section class="flex-1 bg-white rounded-lg shadow-lg p-6 mb-8 md:mb-0 overflow-auto">
+      <main class="container mx-auto flex flex-col md:flex-row gap-8 px-2 md:px-4 lg:px-8 w-full max-w-7xl">
+        <section class="flex-1 bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8 md:mb-0 overflow-auto min-w-[320px]">
           <h2 class="text-xl font-semibold mb-4 text-indigo-700">Tree View</h2>
-          <div id="tree-container" class="w-full h-[600px] md:h-[700px] bg-indigo-50 rounded-lg border border-indigo-100"></div>
+          <div class="mb-4 flex flex-col md:flex-row gap-4 items-stretch">
+            <div class="flex-1 flex flex-col gap-2">
+              <label for="paste-area" class="text-sm font-medium text-gray-700">Paste JSON or CSV</label>
+              <textarea id="paste-area" rows="4" class="w-full rounded border border-indigo-200 bg-indigo-50 p-2 text-sm font-mono focus:ring-2 focus:ring-indigo-400 focus:outline-none resize-y" placeholder="Paste your JSON or CSV here..."></textarea>
+            </div>
+            <button id="parse-paste" class="h-10 mt-6 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition self-end">Parse</button>
+          </div>
+          <div id="tree-container" class="w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] bg-indigo-50 rounded-lg border border-indigo-100" role="tree" aria-label="JSON tree viewer"></div>
         </section>
-        <aside class="w-full md:w-96 bg-white rounded-lg shadow-lg p-6">
+        <aside class="w-full md:w-96 bg-white rounded-lg shadow-lg p-4 md:p-6 min-w-[260px] max-w-full">
           <h2 class="text-xl font-semibold mb-4 text-indigo-700">Node Details</h2>
-          <div id="node-details" class="text-gray-700 text-sm">Hover over a node to see details here.</div>
+          <div id="node-details" class="text-gray-700 text-sm break-words">Hover over a node to see details here.</div>
         </aside>
       </main>
       <footer class="w-full py-4 mt-8 bg-white text-center text-gray-400 text-xs border-t">
@@ -131,6 +138,97 @@
         img.src = image64;
       }
       document.getElementById('download-png').addEventListener('click', downloadTreeAsPng);
+    </script>
+    <!-- Accessibility: Keyboard navigation and ARIA roles -->
+    <script>
+      let focusedNode = null;
+      function focusNode(d, el) {
+        if (focusedNode) {
+          d3.select(focusedNode).select('circle').attr('stroke', '#a5b4fc').attr('stroke-width', 2);
+          d3.select(focusedNode).attr('tabindex', null);
+        }
+        focusedNode = el;
+        d3.select(el).attr('tabindex', 0).node().focus();
+        d3.select(el).select('circle').attr('stroke', '#f59e42').attr('stroke-width', 4);
+      }
+      function handleNodeKeydown(event, d) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          // Toggle expand/collapse
+          if (d.children) {
+            d._children = d.children;
+            d.children = null;
+          } else {
+            d.children = d._children;
+            d._children = null;
+          }
+          d3.select('#tree-container').selectAll('*').remove();
+          createTree(treeData);
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          // Move focus to next/previous node
+          const nodes = Array.from(document.querySelectorAll('g.node'));
+          const idx = nodes.indexOf(focusedNode);
+          let nextIdx = event.key === 'ArrowDown' ? idx + 1 : idx - 1;
+          if (nextIdx < 0) nextIdx = nodes.length - 1;
+          if (nextIdx >= nodes.length) nextIdx = 0;
+          focusNode(null, nodes[nextIdx]);
+        }
+      }
+      // Patch createTree to add ARIA and keyboard handlers
+      function createTree(data) {
+        // ...existing code...
+        // (inside createTree, after nodeEnter is defined)
+        nodeEnter.attr('role', 'treeitem')
+          .attr('aria-label', d => d.data.name)
+          .attr('tabindex', -1)
+          .on('focus', function(event, d) { focusNode(d, this); })
+          .on('keydown', function(event, d) { handleNodeKeydown(event, d); });
+        // ...existing code...
+      }
+      // Set initial focus to root node after tree renders
+      function setInitialFocus() {
+        setTimeout(() => {
+          const rootNode = document.querySelector('g.node');
+          if (rootNode) focusNode(null, rootNode);
+        }, 400);
+      }
+      // Patch processJSON to set focus after rendering
+      async function processJSON(json) {
+        showProgressModal('Parsing JSON...');
+        try {
+          const tree = await parseToTree(json);
+          treeData = tree;
+          d3.select('#tree-container').selectAll('*').remove();
+          createTree(treeData);
+          addProgressStep('<span class="text-green-600 font-semibold">Parsing complete!</span>');
+          setTimeout(hideProgressModal, 700);
+          setInitialFocus();
+        } catch (e) {
+          addProgressStep('<span class="text-red-600">Parsing failed.</span>');
+          setTimeout(hideProgressModal, 1200);
+          alert('Failed to parse JSON.');
+        }
+      }
+    </script>
+    <!-- Paste area logic -->
+    <script>
+      const pasteBtn = document.getElementById('parse-paste');
+      pasteBtn.addEventListener('click', function() {
+        const text = document.getElementById('paste-area').value.trim();
+        if (!text) return alert('Paste some JSON or CSV first!');
+        try {
+          let data;
+          if (text.startsWith('{') || text.startsWith('[')) {
+            data = JSON.parse(text);
+          } else if (text.includes(',')) {
+            data = csvToJson(text);
+          } else {
+            throw new Error('Not valid JSON or CSV');
+          }
+          processJSON(data);
+        } catch (e) {
+          alert('Invalid JSON or CSV: ' + e.message);
+        }
+      });
     </script>
 </body>
 </html>
