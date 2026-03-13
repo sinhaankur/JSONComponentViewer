@@ -1,8 +1,8 @@
 # Netlify configuration for static site deployment
 
 [build]
-  command = "npm run build"
-  publish = ".next"
+  publish = "."
+  command = ""
 
 # Uncomment below to add custom headers or redirects
 #[[redirects]]

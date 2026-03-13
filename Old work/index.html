@@ -30,6 +30,37 @@ document.addEventListener('DOMContentLoaded', function() {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+</script>
+    </body>
+    <script>
+    // Initialize CodeMirror and inputError after all scripts and DOM are loaded
+    let codeMirror;
+    let inputError;
+    window.addEventListener('DOMContentLoaded', function() {
+      // Setup CodeMirror
+      const textarea = document.getElementById('json-editor');
+      if (window.CodeMirror && textarea) {
+        codeMirror = CodeMirror.fromTextArea(textarea, {
+          mode: { name: 'javascript', json: true },
+          lineNumbers: true,
+          tabSize: 2,
+          theme: 'default',
+          viewportMargin: Infinity,
+          lineWrapping: true,
+          autofocus: true,
+          placeholder: 'Paste JSON or CSV here...'
+        });
+        // Move CodeMirror to custom container
+        const cmWrapper = codeMirror.getWrapperElement();
+        const cmContainer = document.getElementById('json-editor-cm');
+        if (cmContainer) {
+          cmContainer.appendChild(cmWrapper);
+        }
+      }
+      // Setup inputError
+      inputError = document.getElementById('input-error');
+    });
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Tree View</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -68,8 +99,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <h2 class="text-xl font-bold text-slate-800 mb-2">Input</h2>
             <div class="flex-1 flex flex-col gap-2">
               <label for="json-editor" class="text-sm font-medium text-gray-700">Paste JSON or CSV</label>
-              <textarea id="json-editor" class="hidden"></textarea>
-              <div id="json-editor-cm" class="border border-indigo-200 rounded-lg overflow-hidden"></div>
+              <textarea id="json-editor" style="display:none;"></textarea>
+              <div id="json-editor-cm" class="border border-indigo-200 rounded-lg overflow-hidden min-h-[120px] bg-white"></div>
               <div id="input-error" class="text-red-600 text-xs mt-1 hidden"></div>
             </div>
             <div class="flex gap-2 mt-2">

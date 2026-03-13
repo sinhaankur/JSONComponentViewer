@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[35644,["/_next/static/chunks/988165a3c9c32c46.js"],"ViewportBoundary"]
+3:I[35644,["/_next/static/chunks/988165a3c9c32c46.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+5:I[23156,["/_next/static/chunks/988165a3c9c32c46.js"],"IconMark"]
+0:{"buildId":"mtql5QFG8c7fRrjTQMvS6","rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"JSON Component Viewer"}],["$","meta","1",{"name":"description","content":"Visualize and explore JSON & CSV data as interactive trees"}],["$","link","2",{"rel":"icon","href":"/icon-light-32x32.png","media":"(prefers-color-scheme: light)"}],["$","link","3",{"rel":"icon","href":"/icon-dark-32x32.png","media":"(prefers-color-scheme: dark)"}],["$","link","4",{"rel":"icon","href":"/icon.svg","type":"image/svg+xml"}],["$","link","5",{"rel":"apple-touch-icon","href":"/apple-icon.png"}],["$","$L5","6",{}]]}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}
