@@ -1,0 +1,16 @@
+# Netlify configuration for static site deployment
+
+[build]
+  publish = "."
+  command = ""
+
+# Uncomment below to add custom headers or redirects
+#[[redirects]]
+#  from = "/old-path"
+#  to = "/new-path"
+#  status = 301
+
+#[[headers]]
+#  for = "/index.html"
+#  [headers.values]
+#    X-Frame-Options = "DENY"
