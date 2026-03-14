@@ -1,16 +1,8 @@
-# Netlify configuration for static site deployment
+# Netlify configuration for Next.js deployment
 
 [build]
   command = "npm run build"
   publish = ".next"
 
-# Uncomment below to add custom headers or redirects
-#[[redirects]]
-#  from = "/old-path"
-#  to = "/new-path"
-#  status = 301
-
-#[[headers]]
-#  for = "/index.html"
-#  [headers.values]
-#    X-Frame-Options = "DENY"
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
