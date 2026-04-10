@@ -172,12 +172,34 @@ interface TreeNodeComponentProps {
   onSelect: (node: TreeNode) => void
   selectedPath: string | null
   scale: number
+  expansionMode: "default" | "expand" | "collapse"
+  expansionSignal: number
 }
 
-function TreeNodeComponent({ node, depth, onSelect, selectedPath, scale }: TreeNodeComponentProps) {
+function TreeNodeComponent({
+  node,
+  depth,
+  onSelect,
+  selectedPath,
+  scale,
+  expansionMode,
+  expansionSignal,
+}: TreeNodeComponentProps) {
   const [isExpanded, setIsExpanded] = useState(depth < 2)
   const hasChildren = node.children && node.children.length > 0
   const isSelected = selectedPath === node.path
+
+  useEffect(() => {
+    if (expansionMode === "expand") {
+      setIsExpanded(true)
+      return
+    }
+    if (expansionMode === "collapse") {
+      setIsExpanded(false)
+      return
+    }
+    setIsExpanded(depth < 2)
+  }, [expansionMode, expansionSignal, depth])
 
   return (
     <div style={{ fontSize: `${scale}rem` }}>
@@ -230,6 +252,8 @@ function TreeNodeComponent({ node, depth, onSelect, selectedPath, scale }: TreeN
               onSelect={onSelect}
               selectedPath={selectedPath}
               scale={scale}
+              expansionMode={expansionMode}
+              expansionSignal={expansionSignal}
             />
           ))}
         </div>
@@ -444,11 +468,18 @@ export default function JSONViewer() {
   const [scale, setScale] = useState(0.875)
   const [inputTab, setInputTab] = useState("paste")
   const [viewMode, setViewMode] = useState<"tree" | "horizontal">("tree")
+  const [treeExpansionMode, setTreeExpansionMode] = useState<"default" | "expand" | "collapse">("default")
+  const [treeExpansionSignal, setTreeExpansionSignal] = useState(0)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isParsing, setIsParsing] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [parseProgress, setParseProgress] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const setTreeExpansion = useCallback((mode: "default" | "expand" | "collapse") => {
+    setTreeExpansionMode(mode)
+    setTreeExpansionSignal((v) => v + 1)
+  }, [])
 
   // Toggle dark mode
   useEffect(() => {
@@ -502,6 +533,7 @@ export default function JSONViewer() {
       await new Promise(resolve => setTimeout(resolve, 50))
 
       setTreeData(buildTree(data))
+      setTreeExpansion("default")
       setParseProgress(100)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid input")
@@ -784,6 +816,30 @@ export default function JSONViewer() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  {viewMode === "tree" && treeData && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 gap-1 px-2"
+                        onClick={() => setTreeExpansion("expand")}
+                        title="Expand All"
+                      >
+                        <Maximize2 className="h-3.5 w-3.5" />
+                        <span className="text-xs">Expand</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 gap-1 px-2"
+                        onClick={() => setTreeExpansion("collapse")}
+                        title="Collapse All"
+                      >
+                        <Minimize2 className="h-3.5 w-3.5" />
+                        <span className="text-xs">Collapse</span>
+                      </Button>
+                    </>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -844,6 +900,8 @@ export default function JSONViewer() {
                         onSelect={setSelectedNode}
                         selectedPath={selectedNode?.path ?? null}
                         scale={scale}
+                        expansionMode={treeExpansionMode}
+                        expansionSignal={treeExpansionSignal}
                       />
                     </div>
                   ) : (
@@ -1057,6 +1115,30 @@ export default function JSONViewer() {
               </div>
             </div>
             <div className="flex items-center gap-1">
+              {viewMode === "tree" && treeData && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1 px-2"
+                    onClick={() => setTreeExpansion("expand")}
+                    title="Expand All"
+                  >
+                    <Maximize2 className="h-3.5 w-3.5" />
+                    <span className="text-xs">Expand</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1 px-2"
+                    onClick={() => setTreeExpansion("collapse")}
+                    title="Collapse All"
+                  >
+                    <Minimize2 className="h-3.5 w-3.5" />
+                    <span className="text-xs">Collapse</span>
+                  </Button>
+                </>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -1109,6 +1191,8 @@ export default function JSONViewer() {
                       onSelect={setSelectedNode}
                       selectedPath={selectedNode?.path ?? null}
                       scale={scale}
+                      expansionMode={treeExpansionMode}
+                      expansionSignal={treeExpansionSignal}
                     />
                   </div>
                 ) : (
